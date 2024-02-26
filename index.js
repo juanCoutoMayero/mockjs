@@ -1,25 +1,35 @@
+
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');  // For generating auth tokens
 const http = require('http');
-const PORT = 3000;
 
-const router = express();
+const app = express();
+const port = 3000;
 
-const server = http.createServer(router);
+// Middleware for parsing request bodies
+app.use(bodyParser.json());
 
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json());
+// Replace this with your actual user authentication logic
+const authenticateUser = (username, password) => {
+    // Perform user validation here, e.g., check against a database
+    // For demonstration, assume a hardcoded user
+    return username === 'demouser' && password === 'password123';
+};
 
-router.use('/', routes);
+// Route for login
+app.post('/auth/login', (req, res) => {
+    const { username, password } = req.body;
 
-router.use('/auth/login', async (req, res, next),() => {
-  authController(req, res, next);
+    if (authenticateUser(username, password)) {
+        const token = jwt.sign({ username }, 'your-secret-key', { expiresIn: '1h' });
+        res.json({ auth_token: token });
+    } else {
+        res.status(401).json({ message: 'Invalid username or password' });
+    }
 });
 
-router.post('/auth/login', validationRequest(IRequestAuthLogin), async (req, res), async () => {
-  const request = req.body;
-  res.status(response.status).json({auth_token: 'asfnaskdjnzfskdzf'});
-});
-
-
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
